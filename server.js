@@ -15,8 +15,15 @@ app.configure(function(){
 // put these in a routers folder
 
 app.get('/:userId',function(req,res){
-	
+	//return a list of groupids, member and if its contact
+
 });
+
+app.post('/connect/:user1/:user2',function(req,res){
+	res.json(repository.addContactByName(req.params.user1,req.params.user2));
+});
+
+
 
 app.get('/group/:groupId',function(req,res){
 
