@@ -11,6 +11,21 @@ app.configure(function(){
 	app.use(connect.static(__dirname + '/public'));
 });
 
+
+// put these in a routers folder
+
+app.get('/:userId',function(req,res){
+	
+});
+
+app.get('/group/:groupId',function(req,res){
+
+});
+
+app.post('/group/:groupId',function(req,res){
+	
+});
+
 app.get('/', function(req,res){
 	res.render('index',{title:'your todo list app'});
 });
@@ -49,6 +64,7 @@ app.post('/:userId/:contactId',function(req,res){
 	}
 	res.json("nok");
 });
+// end routes
 
 app.listen(3000);
 console.log('server listening on port 3000');
