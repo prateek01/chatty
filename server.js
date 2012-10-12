@@ -1,6 +1,6 @@
 var express=require('express'),
 	connect = require('connect'),
-	datastore=require('./chatStore.js');
+	repository=require('./repository.js');
 
 var app=express();
 
@@ -19,7 +19,8 @@ app.get('/:userId',function(req,res){
 
 });
 
-app.post('/connect/:user1/:user2',function(req,res){
+app.get('/connect/:user1/:user2',function(req,res){
+	console.log('connecting 2 users');
 	res.json(repository.addContactByName(req.params.user1,req.params.user2));
 });
 
@@ -39,16 +40,11 @@ app.get('/', function(req,res){
 
 app.post('/register',function(req,res){
 	console.log('registed called');
-	if(req.body.key)
-		datastore.storeUser(req.body.key);
-	var thisUser=datastore.findUser(req.body.key);
-	res.json(
-	{
-		id: thisUser.id,
-		username:thisUser.username,
-		contacts: datastore.getContacts(thisUser),
-		suggestedUsers: datastore.findSuggestedUsers(thisUser)	
-	});
+	if(req.body.key){
+		repository.register(req.body.key);
+		res.json(repository.getInitialData(req.body.key));
+	}
+	else res.json("nok");
 });
 
 

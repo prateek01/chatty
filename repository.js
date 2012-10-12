@@ -2,66 +2,88 @@ var uuid=require('node-uuid');
 
 var repository = {
 	users:{},
-	userGroups:{},
+	names:{},
 	groups:{},
 	messages:{},
 
 	register: function(username){
-		if(this.users[username] == undefined){
+		if(this.names[username] == undefined){
 			var id=this.genUniqueId(this.users);
-			this.users[id]=username;
-			this.users[username]=id;
-			this.userGroups[id]=[];
+			var auser={
+				'id':id,
+				name:username,
+				contacts:[],
+				contactGroups:[],
+				groups:[]
+			};
+			this.users[id]=auser;
+			this.names[username]=auser;
+			this.addContact(auser,auser,null);
 		}
 	},
 
 	addContactByName:function(user1,user2,createInverse){
-		var x= this.users[user1];
-		var y= this.users[user2];
+		var x= this.names[user1];
+		var y= this.names[user2];
 		if(x && y){
-			var x=addContact(x,y,true);
-			if(x!=null)
-				return {groupId:x,isContact:true,contactName:user2};
+			var gid=this.addContact(x,y,true);
+			if(gid!=null){
+				return {groupId:gid,isContact:true,contactName:x.name};
+			}
 		}
 		return null;
 	},
-	addContact:function(uid1,uid2,createInverse){
-		for(var i=0;i<this.userGroups[uid1].length;i++)
-			if(this.groups[this.userGroups[uid1][i]].isContact && 
-				this.groups[this.userGroups[uid1][i]].contactId==uid2)
-				return null;
-		var gid=this.genUniqueId(this.groups);
-		this.groups[gid]={isContact:true,contactId:uid2};
-		this.userGroups[uid1].push(gid);
+	
+	addContact:function(user1,user2,createInverse){
+		var gid=null;
+		if(user1.contacts.indexOf(user2.id)<0){
+			gid=this.genUniqueId(this.groups);
+			user1.contacts.push(user2.id);
+			user1.contactGroups.push(gid);
+			if(this.groups[gid]==undefined)
+				this.groups[gid]=new Array(user1.id,user2.id);
+		}
+
 		if(createInverse!=null)
-			this.addContact(uid2,uid1,null);
+			this.addContact(user2,user1,null);
 
 		return gid;
 	},
 
 	getInitialData: function(username){
 		var x={
-			groups:[],
+			id:'',
+			name:'',
+			contacts:[],
 			suggestedUsers:[]
 		}
 
-		var ug=this.userGroups[this.users[username]];
-		var contacts=[];
-		for(var i=0;i<ug.length;i++){
-			x.groups.push({
-				groupId:ug[i],
-				isContact:this.groups[ug[i]].isContact,
-				contactName: this.users[this.groups[ug[i]].contactId]
-			});
+		var user=this.names[username];
+		if(user==undefined)
+			return x;
+		
+		x.id=user.id;
+		x.name=user.name;
 
-			if(x.groups[x.groups.length-1].isContact)
-				contacts.push(x.groups[x.groups.length-1].contactName);
+		for(var i=0;i<user.contacts.length;i++){
+			x.contacts.push({
+				groupId:user.contactGroups[i],
+				name: this.users[user.contacts[i]].name
+			});
 		}
+
+		for(var uid in this.users){
+			if(x.suggestedUsers.length>20)
+				break;
+			if(user.contacts.indexOf(uid)<0)
+				x.suggestedUsers.push(this.users[uid].name);
+		}
+
+		return x;
 	},
 
 	getMessages:function(groupId){
-		var msglist=[];
-		for(var i=)
+		
 	},
 
 	genUniqueId:function(container){

@@ -21,5 +21,5 @@ repo=require('./repository.js');
 
 repo.register('prateek');
 repo.register('sam');
-repo.addContact(repo.users['prateek'],repo.users['sam'],true);
+repo.addContactByName('prateek','sam');
 console.log(JSON.stringify(repo));
